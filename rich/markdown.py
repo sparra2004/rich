@@ -592,6 +592,7 @@ class Markdown(JupyterMixin):
         tokens = self.parsed
         inline_style_tags = self.inlines
         new_line = False
+        kbd_depth = 0
         _new_line_segment = Segment.line()
 
         for token in self._flatten_tokens(tokens):
@@ -617,13 +618,16 @@ class Markdown(JupyterMixin):
                 else:
                     context.stack.push(Link.create(self, token))
             elif node_type == "html_inline":
-                if token.content == "<kbd>":
-                    kbd_style = console.get_style("markdown.kbd", default="bold")
-                    context.enter_style(kbd_style)
-                elif token.content == "</kbd>":
-                    context.leave_style()
-                else:
-                    continue
+             if token.content == "<kbd>":
+                 kbd_style = console.get_style("markdown.kbd", default="bold")
+                 context.enter_style(kbd_style)
+                 kbd_depth += 1
+             elif token.content == "</kbd>":
+                 if kbd_depth > 0:
+                     context.leave_style()
+                     kbd_depth -= 1
+             else:
+                 continue
             elif node_type == "link_close":
                 if self.hyperlinks:
                     context.leave_style()
