@@ -210,3 +210,14 @@ if __name__ == "__main__":
     rendered = render(markdown)
     print(rendered)
     print(repr(rendered))
+
+def test_markdown_unmatched_closing_kbd() -> None:
+    console = Console(width=40, color_system=None)
+    for source in [
+        "a </kbd> b",
+        "# Title </kbd>",
+        "- item </kbd>",
+        "**bold </kbd> text**",
+        "<kbd>ok</kbd> fine",
+    ]:
+        console.print(Markdown(source))
